@@ -1,22 +1,22 @@
 ## Main build rule
 
-all: plot_Antwerp.pdf plot_all.pdf
+all: gen/output/plot_Antwerp.pdf gen/output/plot_all.pdf 
 
 ## Sub rules		
-listings.csv reviews.csv: download.R
-		R --vanilla < download.R
+data/listings.csv data/reviews.csv: src/data-preparation/download.R
+		R --vanilla < src/data-preparation/download.R
 
-aggregated_df.csv: clean.R listings.csv reviews.csv
-		R --vanilla < clean.R
+gen/temp/aggregated_df.csv: src/data-preparation/clean.R data/listings.csv data/reviews.csv
+		R --vanilla < src/data-preparation/clean.R
 		
-pivot_table.csv: aggregated_df.csv pivot_table.R
-		R --vanilla < pivot_table.R
+gen/temp/pivot_table.csv: gen/temp/aggregated_df.csv src/analysis/pivot_table.R
+		R --vanilla < src/analysis/pivot_table.R
 		
-plot_Antwerp.pdf: plot_Antwerp.R pivot_table.csv
-		R --vanilla < plot_Antwerp.R
+gen/output/plot_Antwerp.pdf: src/analysis/plot_Antwerp.R gen/temp/pivot_table.csv
+		R --vanilla < src/analysis/plot_Antwerp.R
 		
-plot_all.pdf: aggregated_df.csv plot_all.R
-		 R --vanilla < plot_all.R
+gen/output/plot_all.pdf: gen/temp/aggregated_df.csv src/analysis/plot_all.R
+		 R --vanilla < src/analysis/plot_all.R
 clean:
 	R -e "unlink('*.pdf')"
 	R -e "unlink('*.csv')"
